@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Agent Chatbot</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f7fa;
+        }
+        .chat-container {
+            max-width: 900px;
+            margin: 0 auto;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        .chat-header {
+            padding: 15px 20px;
+            background: #4285f4;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        #chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .message {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            line-height: 1.5;
+            position: relative;
+        }
+        .user-message {
+            align-self: flex-end;
+            background: #4285f4;
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+        .bot-message {
+            align-self: flex-start;
+            background: #f1f3f4;
+            color: #202124;
+            border-bottom-left-radius: 4px;
+            border-left: 4px solid;
+        }
+        .message-technical {
+            border-left-color: #ea4335;
+        }
+        .message-creative {
+            border-left-color: #fbbc05;
+        }
+        .message-analytical {
+            border-left-color: #34a853;
+        }
+        .message-general {
+            border-left-color: #4285f4;
+        }
+        .message-meta {
+            font-size: 0.75rem;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+        .input-area {
+            padding: 15px;
+            display: flex;
+            gap: 10px;
+            border-top: 1px solid #e0e0e0;
+            background: #f8f9fa;
+        }
+        #message-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #dfe1e5;
+            border-radius: 24px;
+            font-size: 1rem;
+            outline: none;
+        }
+        #send-button {
+            background: #4285f4;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .typing-indicator {
+            display: inline-flex;
+            gap: 5px;
+            padding: 12px 16px;
+            background: #f1f3f4;
+            border-radius: 18px;
+            margin-bottom: 15px;
+        }
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: #5f6368;
+            border-radius: 50%;
+            animation: bounce 1.4s infinite;
+        }
+        @keyframes bounce {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-4px); }
+        }
+        .agent-tag {
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-left: 5px;
+            background: #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            Multi-Agent Chatbot
+        </div>
+        <div id="chat-messages">
+            <div class="message bot-message message-general">
+                Hello! I'm your multi-agent assistant. I have different specialists ready to help:
+                <ul>
+                    <li><strong>General</strong> - Everyday questions</li>
+                    <li><strong>Technical</strong> - Programming and tech</li>
+                    <li><strong>Creative</strong> - Writing and art</li>
+                    <li><strong>Analytical</strong> - Data and analysis</li>
+                </ul>
+                How can I help you today?
+            </div>
+        </div>
+        <div class="input-area">
+            <input type="text" id="message-input" placeholder="Type your message..." autocomplete="off">
+            <button id="send-button">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 2L11 13"></path>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const messageInput = document.getElementById('message-input');
+        const sendButton = document.getElementById('send-button');
+        const chatMessages = document.getElementById('chat-messages');
+        
+        function addMessage(text, isUser, agentType = 'general') {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : `bot-message message-${agentType}`}`;
+            
+            const messageContent = document.createElement('div');
+            messageContent.textContent = text;
+            messageDiv.appendChild(messageContent);
+            
+            if (!isUser) {
+                const metaDiv = document.createElement('div');
+                metaDiv.className = 'message-meta';
+                metaDiv.innerHTML = `
+                    ${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                    <span class="agent-tag">${agentType}</span>
+                `;
+                messageDiv.appendChild(metaDiv);
+            }
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        function showTyping() {
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'typing-indicator';
+            typingDiv.innerHTML = `
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+            `;
+            chatMessages.appendChild(typingDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            return typingDiv;
+        }
+        
+        async function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message) return;
+            
+            addMessage(message, true);
+            messageInput.value = '';
+            
+            const typingIndicator = showTyping();
+            
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(await response.text());
+                }
+                
+                const data = await response.json();
+                typingIndicator.remove();
+                addMessage(data.response, false, data.agent);
+            } catch (error) {
+                typingIndicator.remove();
+                addMessage("Error: " + error.message, false);
+                console.error('Error:', error);
+            }
+        }
+        
+        sendButton.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+        
+        messageInput.focus();
+    </script>
+</body>
+</html>
